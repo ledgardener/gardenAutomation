@@ -1,0 +1,598 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Indoor Garden
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret latitude
+  longitude: !secret longitude
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: !secret elevation
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: !secret timezone
+  # Customization file
+  customize: !include customize.yaml
+
+# Show links to resources in log and frontend
+#introduction:
+
+# Enables the frontend
+frontend:
+  themes: !include_dir_merge_named themes
+
+system_health:
+
+# Enables configuration UI
+config:
+
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+http:
+  base_url: !secret baseurl
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+  # Optional, allows Home Assistant developers to focus on popular components.
+  # include_used_components: true
+
+# Discover some devices automatically
+discovery:
+  ignore: apple_tv
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time
+history:
+  exclude:
+    domains:
+      - mobile_app
+      - ios
+
+# View all events in a logbook
+logbook:
+
+# Enables a map showing the location of tracked devices
+map:
+
+# Sensors
+sensor:
+  - platform: systemmonitor
+    resources:
+      - type: disk_use_percent
+        arg: /home
+      - type: memory_free
+  - platform: mqtt
+    name: "Drain Basin"
+    state_topic: "4x4/drainBasin"
+  - platform: mqtt
+    name: "ph"
+    state_topic: "4x4/pH"
+    unit_of_measurement: 'pH'
+  - platform: mqtt
+    name: "ec"
+    state_topic: "4x4/EC"
+    unit_of_measurement: 'EC'
+  - platform: mqtt
+    name: "Controller"
+    icon: mdi:dip-switch
+    state_topic: "4x4/Diagnostics"
+  - platform: mqtt
+    name: "flood"
+    state_topic: "4x4/Flood"
+  - platform: mqtt
+    name: "Motion"
+    state_topic: "4x4/motion"
+    icon: mdi:motion-sensor
+  - platform: mqtt
+    name: "Water Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "4x4/WaterTemp"
+  - platform: mqtt
+    name: "Control Box"
+    unit_of_measurement: '°C'
+    state_topic: "4x4/boxTemp"
+  - platform: mqtt
+    name: "waterlevel"
+    unit_of_measurement: 'Gallons'
+    state_topic: "4x4/waterLevel"
+  - platform: template
+    sensors:
+      atlas_ph:
+        friendly_name: "Atlas pH Sensor"
+        value_template: "{{ (states('sensor.ph') | float)}}"
+        icon_template: mdi:alpha-p-circle 
+        unit_of_measurement: 'pH'
+      atlas_ec:
+        friendly_name: "Atlas EC Sensor"
+        value_template: "{{ (states('sensor.ec') | float / 1000) | round(3)}}"
+        icon_template: mdi:alpha-e-circle 
+        unit_of_measurement: 'EC'
+      watertemperature:
+        friendly_name: "Water Temp Sensor"
+        value_template: "{{ states('sensor.watertemperature') | float }}"
+        unit_of_measurement: '°C'
+        icon_template: mdi:coolant-temperature
+      water_level:
+        friendly_name: "Nute Water Level"
+        value_template: "{{ (states('sensor.waterlevel') | float)}}"
+        unit_of_measurement: 'Gallons'
+        icon_template: mdi:car-coolant-level
+      days_since_grow_start:
+        friendly_name: "Days Since Grow Start"
+        icon_template: mdi:calendar
+        value_template: '{{ ((as_timestamp(now()) - (states.input_datetime.grow_start_date.attributes.timestamp)) | int /60/1440) | round(0) }}'
+        entity_id: input_datetime.grow_start_date,sensor.time
+      current_week_of_grow:
+        friendly_name: "Current Week of Grow"
+        icon_template: mdi:calendar
+        value_template: '{{ ((as_timestamp(now()) - (states.input_datetime.grow_start_date.attributes.timestamp)) | int /60/1440//7 +1)  | round(0) }}'
+        entity_id: input_datetime.grow_start_date,sensor.time
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+
+# Switches
+switch:
+  - platform: mqtt
+    name: "Relay 0"
+    state_topic: "nodecommands/R"
+    command_topic: "nodecommands/R"
+    payload_on: "01"
+    payload_off: "00"
+    state_on: "01"
+    state_off: "00"
+  - platform: mqtt
+    name: "Relay 1"
+    state_topic: "nodecommands/R"
+    command_topic: "nodecommands/R"
+    payload_on: "11"
+    payload_off: "10"
+    state_on: "11"
+    state_off: "10"
+  - platform: mqtt
+    name: "Relay 2"
+    state_topic: "nodecommands/R"
+    command_topic: "nodecommands/R"
+    payload_on: "21"
+    payload_off: "20"
+    state_on: "21"
+    state_off: "20"
+  - platform: mqtt
+    name: "Relay 3"
+    state_topic: "nodecommands/R"
+    command_topic: "nodecommands/R"
+    payload_on: "31"
+    payload_off: "30"
+    state_on: "31"
+    state_off: "30"
+  - platform: mqtt
+    name: "Relay 4"
+    state_topic: "nodecommands/R"
+    command_topic: "nodecommands/R"
+    payload_on: "41"
+    payload_off: "40"
+    state_on: "41"
+    state_off: "40"
+  - platform: mqtt
+    name: "Relay 5"
+    state_topic: "nodecommands/R"
+    command_topic: "nodecommands/R"
+    payload_on: "51"
+    payload_off: "50"
+    state_on: "51"
+    state_off: "50"
+  - platform: mqtt
+    name: "Relay 6"
+    state_topic: "nodecommands/R"
+    command_topic: "nodecommands/R"
+    payload_on: "61"
+    payload_off: "60"
+    state_on: "61"
+    state_off: "60"
+  - platform: mqtt
+    name: "Relay 7"
+    state_topic: "nodecommands/R"
+    command_topic: "nodecommands/R"
+    payload_on: "71"
+    payload_off: "70"
+    state_on: "71"
+    state_off: "70"
+  - platform: mqtt
+    name: "Outlet 0"
+    state_topic: "nodecommands/O"
+    command_topic: "nodecommands/O"
+    payload_on: "01"
+    payload_off: "00"
+    state_on: "01"
+    state_off: "00"
+  - platform: mqtt
+    name: "Outlet 1"
+    state_topic: "nodecommands/O"
+    command_topic: "nodecommands/O"
+    payload_on: "11"
+    payload_off: "10"
+    state_on: "11"
+    state_off: "10"
+  - platform: mqtt
+    name: "Outlet 2"
+    state_topic: "nodecommands/O"
+    command_topic: "nodecommands/O"
+    payload_on: "21"
+    payload_off: "20"
+    state_on: "21"
+    state_off: "20"
+  - platform: mqtt
+    name: "Outlet 3"
+    state_topic: "nodecommands/O"
+    command_topic: "nodecommands/O"
+    payload_on: "31"
+    payload_off: "30"
+    state_on: "31"
+    state_off: "30"
+  - platform: mqtt
+    name: "pH Pump"
+    state_topic: "nodefeedback/P"
+    command_topic: "nodecommands/P"
+    payload_on: "1"
+    payload_off: "0"
+    state_on: "ON"
+    state_off: "OFF"
+  - platform: mqtt
+    name: "CalMag Pump"
+    state_topic: "nodefeedback/C"
+    command_topic: "nodecommands/C"
+    payload_on: "1"
+    payload_off: "0"
+    state_on: "ON"
+    state_off: "OFF"
+  - platform: mqtt
+    name: "Micro Pump"
+    state_topic: "nodefeedback/M"
+    command_topic: "nodecommands/M"
+    payload_on: "1"
+    payload_off: "0"
+    state_on: "ON"
+    state_off: "OFF"
+  - platform: mqtt
+    name: "Bloom Pump"
+    state_topic: "nodefeedback/B"
+    command_topic: "nodecommands/B"
+    payload_on: "1"
+    payload_off: "0"
+    state_on: "ON"
+    state_off: "OFF"
+  - platform: mqtt
+    name: "Grow Pump"
+    state_topic: "nodefeedback/G"
+    command_topic: "nodecommands/G"
+    payload_on: "1"
+    payload_off: "0"
+    state_on: "ON"
+    state_off: "OFF"
+
+tplink:
+  discovery: false
+  switch:
+    - host: 192.168.1.80
+    - host: 192.168.1.81
+    - host: 192.168.1.82
+    - host: 192.168.1.83
+
+# Text to speech
+tts:
+  - platform: google_translate
+    service_name: google_say
+
+# Cloud
+cloud:
+
+# Mobile App
+mobile_app:
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+
+homekit:
+ios:
+
+input_datetime:
+  lights_on_time_4x4:
+    name: 4x4 Lights On Time
+    has_date: false
+    has_time: true
+  lights_off_time_4x4:
+    name: 4x4 Lights Off Time
+    has_date: false
+    has_time: true
+  fert_1_time_4x4:
+    name: Fertigation 1 Start Time
+    has_date: false
+    has_time: true
+  fert_2_time_4x4:
+    name: Fertigation 2 Start Time
+    has_date: false
+    has_time: true
+  fert_3_time_4x4:
+    name: Fertigation 3 Start Time
+    has_date: false
+    has_time: true
+  fert_4_time_4x4:
+    name: Fertigation 4 Start Time
+    has_date: false
+    has_time: true
+  fert_5_time_4x4:
+    name: Fertigation 5 Start Time
+    has_date: false
+    has_time: true
+  grow_start_date:
+    name: Grow Start Date
+    has_date: true
+    has_time: false
+
+input_number:
+  target_ph_input:
+    name: Target pH
+    min: 5.8
+    max: 6.5
+    step: .1
+    icon: mdi:bullseye
+    unit_of_measurement: pH
+  target_ec_input:
+    name: Target EC
+    min: 0.5
+    max: 2.5
+    step: .1
+    icon: mdi:bullseye
+    unit_of_measurement: EC
+  grow_ml_per_gallon:
+    name: Grow
+    min: 0
+    max: 8
+    step: .5
+    icon: mdi:beaker
+    unit_of_measurement: mL/G
+  micro_ml_per_gallon:
+    name: Micro
+    min: 0
+    max: 8
+    step: .5
+    icon: mdi:beaker
+    unit_of_measurement: mL/G
+  bloom_ml_per_gallon:
+    name: Bloom
+    min: 0
+    max: 8
+    step: .5
+    icon: mdi:beaker
+    unit_of_measurement: mL/G
+  calmag_ml_per_gallon:
+    name: CalMag
+    min: 0
+    max: 8
+    step: .5
+    icon: mdi:beaker
+    unit_of_measurement: mL/G
+  nutrient_batch_size:
+    name: Nute Batch Size (G)
+    min: 1
+    max: 12
+    step: .5
+    icon: mdi:cup-water
+    unit_of_measurement: Gallons
+    mode: box
+  last10:
+    name: last10
+    mode: box
+    min:  1
+    max:  14
+  last9:
+    name: last9
+    mode: box
+    min:  1
+    max:  14
+  last8:
+    name: last8
+    mode: box
+    min:  1
+    max:  14
+  last7:
+    name: last7
+    mode: box
+    min:  1
+    max:  14
+  last6:
+    name: last6
+    mode: box
+    min:  1
+    max:  14
+  last5:
+    name: last5
+    mode: box
+    min:  1
+    max:  14
+  last4:
+    name: last4
+    mode: box
+    min:  1
+    max:  14
+  last3:
+    name: last3
+    mode: box
+    min:  1
+    max:  14
+  last2:
+    name: last2
+    mode: box
+    min:  1
+    max:  14
+  last1:
+    name: last1
+    mode: box
+    min:  1
+    max:  14
+  fertigation_duration:
+    name: Duration
+    min: .5
+    max: 10
+    step: .5
+    icon: mdi:timer
+    unit_of_measurement: Minutes
+  fertigation_freq:
+    name: Frequency
+    min: 0
+    max: 5
+    step: 1
+    icon: mdi:pound-box
+    unit_of_measurement: Fertigations
+  humidity_target:
+    name: Humidity
+    min: 0
+    max: 100
+    initial: 60    
+    step: 5
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+  temp_target:
+    name: Temperature
+    min: 15
+    max: 30
+    initial: 24
+    step: 1
+    icon: mdi:temperature-celsius
+    unit_of_measurement: '°C'
+  pump_nutes_directly:
+    name: Pump Nutes Directly
+    mode: box
+    min: 0
+    max: 50
+    icon: mdi:water-pump
+    unit_of_measurement: 'mL'
+  peri_pump_1_spd:
+    name: Pump 1 Speed
+    mode: box
+    min: 190
+    max: 254
+    initial: 210
+    icon: mdi:speedometer
+    unit_of_measurement: 'PWM'
+  peri_pump_2_spd:
+    name: Pump 2 Speed
+    mode: box
+    min: 190
+    max: 254
+    initial: 204
+    icon: mdi:speedometer
+    unit_of_measurement: 'PWM'
+  peri_pump_3_spd:
+    name: Pump 3 Speed
+    mode: box
+    min: 190
+    max: 254
+    initial: 211
+    icon: mdi:speedometer
+    unit_of_measurement: 'PWM'
+  peri_pump_4_spd:
+    name: Pump 4 Speed
+    mode: box
+    min: 190
+    max: 254
+    initial: 206
+    icon: mdi:speedometer
+    unit_of_measurement: 'PWM'
+  peri_pump_5_spd:
+    name: Pump 5 Speed
+    mode: box
+    min: 190
+    max: 254
+    initial: 205
+    icon: mdi:speedometer
+    unit_of_measurement: 'PWM'
+
+#show custom cards with fertigation time input if sensors are on
+binary_sensor:
+  - platform: template
+    sensors:
+      fert_1:
+        friendly_name: "One Fert"
+        value_template: >-
+          {{ states("input_number.fertigation_freq") | float >= 1.0 }}
+  - platform: template
+    sensors:
+      fert_2:
+        friendly_name: "Two Ferts"
+        value_template: >-
+          {{ states("input_number.fertigation_freq") | float >= 2.0 }}
+  - platform: template
+    sensors:
+      fert_3:
+        friendly_name: "Three Ferts"
+        value_template: >-
+          {{ states("input_number.fertigation_freq") | float >= 3.0 }}
+  - platform: template
+    sensors:
+      fert_4:
+        friendly_name: "Four Ferts"
+        value_template: >-
+          {{ states("input_number.fertigation_freq") | float >= 4.0 }}
+  - platform: template
+    sensors:
+      fert_5:
+        friendly_name: "Five Ferts"
+        value_template: >-
+          {{ states("input_number.fertigation_freq") | float >= 5.0 }}
+
+#mariadb stuff
+recorder:
+  db_url: !secret dburl
+  include:
+    entities:
+      - input_datetime.fert_1_time_4x4
+      - input_datetime.fert_2_time_4x4
+      - input_datetime.fert_3_time_4x4
+      - input_datetime.fert_4_time_4x4
+      - input_datetime.fert_5_time_4x4
+      - input_datetime.grow_start_date
+      - input_datetime.lights_off_time_4x4
+      - input_datetime.lights_on_time_4x4
+      - input_number.fertigation_duration
+      - input_number.fertigation_freq
+      - input_number.grow_ml_per_gallon
+      - input_number.micro_ml_per_gallon
+      - input_number.humidity_target
+      - input_number.nutrient_batch_size
+      - input_number.target_ec_input
+      - input_number.target_ph_input
+      - input_number.temp_target
+      - script.1580584086014
+      - sensor.atlas_ec
+      - sensor.atlas_ph
+      - sensor.control_box
+      - sensor.motion
+      - sensor.drain_basin
+      - sensor.flood
+      - sensor.pepper_tent_humidity
+      - sensor.pepper_tent_humidity_2
+      - sensor.pepper_tent_temp
+      - sensor.pepper_tent_temp_2
+      - sensor.controller
+      - sensor.water_level
+      - sensor.water_temperature
+      - switch.seedlingheater
+      - switch.seedlinghumidifier
+      - switch.ph_pump
+      - switch.calmag_pump
+      - switch.micro_pump
+      - switch.bloom_pump
+      - switch.grow_pump
+      - switch.outlet_0
+      - switch.outlet_1
+      - switch.outlet_2
+      - switch.outlet_3

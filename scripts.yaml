@@ -1,0 +1,240 @@
+'1578112804156':
+  alias: Calibrate pH Midpoint
+  sequence:
+  - data:
+      payload:
+      topic: nodecommands/x
+    service: mqtt.publish
+'1578112854070':
+  alias: Calibrate pH Low Point
+  sequence:
+  - data:
+      payload:
+      topic: nodecommands/w
+    service: mqtt.publish
+'1578112918923':
+  alias: Calibrate pH High Point
+  sequence:
+  - data:
+      payload:
+      topic: nodecommands/v
+    service: mqtt.publish
+'1578122804156':
+  alias: Calibrate EC Dry
+  sequence:
+  - data:
+      payload:
+      topic: nodecommands/X
+    service: mqtt.publish
+'1578132854070':
+  alias: Calibrate EC Low Point
+  sequence:
+  - data:
+      payload:
+      topic: nodecommands/W
+    service: mqtt.publish
+'1578142918923':
+  alias: Calibrate EC High Point
+  sequence:
+  - data:
+      payload:
+      topic: nodecommands/V
+    service: mqtt.publish
+'1580541128769':
+  alias: Fertigation Event 1
+  sequence:
+  - entity_id: switch.outlet_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.outlet_2
+    service: switch.turn_off
+'1580541128466':
+  alias: Fertigation Event 2
+  sequence:
+  - entity_id: switch.outlet_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.outlet_2
+    service: switch.turn_off
+'1580541158469':
+  alias: Fertigation Event 3
+  sequence:
+  - entity_id: switch.outlet_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.outlet_2
+    service: switch.turn_off
+'1580541148469':
+  alias: Fertigation Event 4
+  sequence:
+  - entity_id: switch.outlet_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.outlet_2
+    service: switch.turn_off
+'1580541138469':
+  alias: Fertigation Event 5
+  sequence:
+  - entity_id: switch.outlet_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.outlet_2
+    service: switch.turn_off
+'1580570973368':
+  alias: Stir Nute Res
+  sequence:
+  - entity_id: switch.outlet_1
+    service: switch.turn_on
+  - delay: 00:05:00
+  - entity_id: switch.outlet_1
+    service: switch.turn_off
+'1580584086014':
+  alias: Dose Nutrients
+  sequence:
+  - entity_id: automation.ph_down_dosing
+    service: automation.turn_off
+  - entity_id: automation.ph_up_dosing
+    service: automation.turn_off
+  - condition: template
+    value_template: '{{ (states("sensor.water_level") | float) < (states("input_number.nutrient_batch_size")
+      | float) }}'
+  - entity_id: switch.outlet_0
+    service: switch.turn_on
+  - wait_template: '{{ (states("sensor.water_level") | float) >= (states("input_number.nutrient_batch_size")
+      | float) }}'
+  - entity_id: switch.outlet_0
+    service: switch.turn_off
+  - delay: 00:00:05
+  - entity_id: switch.relay_0
+    service: switch.turn_on
+  - data:
+      payload_template: '{{float(states(''input_number.calmag_ml_per_gallon'')) *
+        float(states(''input_number.nutrient_batch_size'')) * float(300)}}'
+      topic: nodecommands/c
+    service: mqtt.publish
+  - delay: 00:01:00
+  - data:
+      payload_template: '{{float(states(''input_number.micro_ml_per_gallon'')) * float(states(''input_number.nutrient_batch_size''))
+        * float(300)}}'
+      topic: nodecommands/m
+    service: mqtt.publish
+  - delay: 00:01:00
+  - data:
+      payload_template: '{{float(states(''input_number.bloom_ml_per_gallon'')) * float(states(''input_number.nutrient_batch_size''))
+        * float(300)}}'
+      topic: nodecommands/b
+    service: mqtt.publish
+  - delay: 00:01:00
+  - data:
+      payload_template: '{{float(states(''input_number.grow_ml_per_gallon'')) * float(states(''input_number.nutrient_batch_size''))  *
+        float(300)}}'
+      topic: nodecommands/g
+    service: mqtt.publish
+  - entity_id: switch.relay_0
+    service: switch.turn_off
+  - delay: 00:01:00
+  - entity_id: switch.outlet_0
+    service: switch.turn_on
+  - timeout: 00:08:00
+    wait_template: '{{ (states("input_number.target_ec_input") | float) >= (states("sensor.atlas_ec")
+      | float) }}'
+  - entity_id: switch.outlet_0
+    service: switch.turn_off
+  - entity_id: switch.outlet_1
+    service: switch.turn_on
+  - entity_id: automation.ph_down_dosing
+    service: automation.turn_on
+  - entity_id: automation.ph_up_dosing
+    service: automation.turn_on
+  - data_template:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      entity_id: input_datetime.last_nute_batch
+    service: input_datetime.set_datetime
+'1580881541636':
+  alias: Empty Drain Basin
+  sequence:
+  - delay: 00:00:30
+  - entity_id: switch.outlet_3
+    service: switch.turn_on
+  - wait_template: '{{  is_state(''sensor.drain_basin'', ''Basin OK'')  }}'
+    timeout: 00:08:00
+  - delay: 00:01:00
+  - entity_id: switch.outlet_3
+    service: switch.turn_off
+'1581193520546':
+  alias: Calibrate pH Down Pump
+  sequence:
+  - data:
+      payload_template: '{{(states(''input_number.peri_pump_1_spd'')) | int}}'
+      topic: nodecommands/S1
+    service: mqtt.publish
+  - delay: 00:00:03
+  - data:
+      payload_template: '{{float(states(''input_number.pump_nutes_directly'')) * float(300)}}'
+      topic: nodecommands/pD
+    service: mqtt.publish
+'1581693120437':
+  alias: Calibrate pH Up Pump
+  sequence:
+  - data:
+      payload_template: '{{(states(''input_number.peri_pump_6_spd'')) | int}}'
+      topic: nodecommands/S6
+    service: mqtt.publish
+  - delay: 00:00:03
+  - data:
+      payload_template: '{{float(states(''input_number.pump_nutes_directly'')) * float(300)}}'
+      topic: nodecommands/pU
+    service: mqtt.publish
+'1581193557668':
+  alias: Calibrate CalMag Pump
+  sequence:
+  - data:
+      payload_template: '{{(states(''input_number.peri_pump_2_spd'')) | int}}'
+      topic: nodecommands/S2
+    service: mqtt.publish
+  - delay: 00:00:03
+  - data:
+      payload_template: '{{float(states(''input_number.pump_nutes_directly'')) * float(300)}}'
+      topic: nodecommands/c
+    service: mqtt.publish
+'1581193541957':
+  alias: Calibrate Micro Pump
+  sequence:
+  - data:
+      payload_template: '{{(states(''input_number.peri_pump_3_spd'')) | int}}'
+      topic: nodecommands/S3
+    service: mqtt.publish
+  - delay: 00:00:03
+  - data:
+      payload_template: '{{float(states(''input_number.pump_nutes_directly'')) * float(300)}}'
+      topic: nodecommands/m
+    service: mqtt.publish
+'1581193572202':
+  alias: Calibrate Bloom Pump
+  sequence:
+  - data:
+      payload_template: '{{(states(''input_number.peri_pump_4_spd'')) | int}}'
+      topic: nodecommands/S4
+    service: mqtt.publish
+  - delay: 00:00:03
+  - data:
+      payload_template: '{{float(states(''input_number.pump_nutes_directly'')) * float(300)}}'
+      topic: nodecommands/b
+    service: mqtt.publish
+'1581193582862':
+  alias: Calibrate Grow Pump
+  sequence:
+  - data:
+      payload_template: '{{(states(''input_number.peri_pump_5_spd'')) | int}}'
+      topic: nodecommands/S5
+    service: mqtt.publish
+  - delay: 00:00:03
+  - data:
+      payload_template: '{{float(states(''input_number.pump_nutes_directly'')) * float(300)}}'
+      topic: nodecommands/g
+    service: mqtt.publish

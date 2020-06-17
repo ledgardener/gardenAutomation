@@ -1,0 +1,387 @@
+- id: '1553145918856'
+  alias: Garage High Temp Alert
+  trigger:
+  - above: '35'
+    entity_id: sensor.bme280_garage_temp
+    platform: numeric_state
+  condition: []
+  action:
+  - data:
+      data:
+        push:
+          sound:
+            critical: 1
+            name: default
+            volume: 1
+      message: Temp is above 35C!
+      title: Garage Tent Alert
+    service: notify.ios_ryphone
+- id: '1566161114961'
+  alias: Flood Detected
+  trigger:
+  - entity_id: sensor.flood
+    from: Dry
+    platform: state
+  condition: []
+  action:
+  - data:
+      data:
+        push:
+          sound:
+            critical: 1
+            name: default
+            volume: 1
+      message: '{{ (states("sensor.flood")) }}'
+      title: Flood Detected!
+    service: notify.ios_ryphone
+  - entity_id: switch.relay_1
+    service: switch.turn_on
+  - entity_id: automation.fertigation_1
+    service: automation.turn_off
+  - entity_id: automation.fertigation_2
+    service: automation.turn_off
+  - entity_id: automation.fertigation_3
+    service: automation.turn_off
+  - entity_id: automation.fertigation_4
+    service: automation.turn_off
+  - entity_id: automation.fertigation_5
+    service: automation.turn_off
+  - entity_id: switch.outlet_0
+    service: switch.turn_off
+  - entity_id: switch.outlet_1
+    service: switch.turn_off
+  - entity_id: switch.outlet_2
+    service: switch.turn_off
+  - entity_id: switch.outlet_3
+    service: switch.turn_off
+- id: '1572200276208'
+  alias: pH Down Dosing
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: /60
+  condition:
+  - condition: template
+    value_template: '{{ (float(states(''sensor.atlas_ph''))) >= (float(states(''input_number.target_ph_input''))
+      + 0.1) }}'
+  - condition: state
+    entity_id: switch.outlet_1
+    state: 'on'
+  action:
+  - data:
+      payload: 300
+      topic: nodecommands/pD
+    service: mqtt.publish
+- id: '1527200376241'
+  alias: pH Up Dosing
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: /60
+  condition:
+  - condition: template
+    value_template: '{{ (float(states(''sensor.atlas_ph''))) <= (float(states(''input_number.target_ph_input''))
+      - 0.1) }}'
+  - condition: state
+    entity_id: switch.outlet_1
+    state: 'on'
+  action:
+  - data:
+      payload: 300
+      topic: nodecommands/pU
+    service: mqtt.publish
+- id: '1575153554457'
+  alias: Seedling Heater Start
+  description: ''
+  trigger:
+  - below: '23'
+    entity_id: sensor.pepper_tent_temp
+    platform: numeric_state
+  condition: []
+  action:
+  - entity_id: switch.seedlingheater
+    service: switch.turn_on
+- id: '1575158558487'
+  alias: Seedling Heater Stop
+  description: ''
+  trigger:
+  - above: '26'
+    entity_id: sensor.pepper_tent_temp
+    platform: numeric_state
+  condition: []
+  action:
+  - entity_id: switch.seedlingheater
+    service: switch.turn_off
+- id: '1575155146563'
+  alias: Humidifier Start
+  description: ''
+  trigger:
+  - entity_id: sensor.pepper_tent_humidity
+    platform: state
+  condition:
+  - condition: template
+    value_template: '{{(states(''sensor.pepper_tent_humidity'') | float) <= (states(''input_number.humidity_target'')
+      | float -5.0) }}'
+  - condition: state
+    entity_id: switch.seedlinghumidifier
+    state: 'off'
+  action:
+  - data: {}
+    entity_id: switch.seedlinghumidifier
+    service: switch.turn_on
+- id: '1575155267131'
+  alias: Humidifier Stop
+  description: ''
+  trigger:
+  - entity_id: sensor.pepper_tent_humidity
+    platform: state
+  condition:
+  - condition: template
+    value_template: '{{(states(''sensor.pepper_tent_humidity'') | float) >= (states(''input_number.humidity_target'')
+      | float +5.0) }}'
+  - condition: state
+    entity_id: switch.seedlinghumidifier
+    state: 'on'
+  action:
+  - data: {}
+    entity_id: switch.seedlinghumidifier
+    service: switch.turn_off
+- id: '1575155146468'
+  alias: pH Stream
+  trigger:
+  - entity_id: sensor.atlas_ph
+    platform: state
+  action:
+  - data_template:
+      entity_id: input_number.last10
+      value: '{{ states(''input_number.last9'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last9
+      value: '{{ states(''input_number.last8'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last8
+      value: '{{ states(''input_number.last7'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last7
+      value: '{{ states(''input_number.last6'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last6
+      value: '{{ states(''input_number.last5'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last5
+      value: '{{ states(''input_number.last4'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last4
+      value: '{{ states(''input_number.last3'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last3
+      value: '{{ states(''input_number.last2'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last2
+      value: '{{ states(''input_number.last1'') }}'
+    service: input_number.set_value
+  - data_template:
+      entity_id: input_number.last1
+      value: '{{ states(''sensor.atlas_ph'') }}'
+    service: input_number.set_value
+- id: '1579535224589'
+  alias: Motion Detection
+  description: ''
+  trigger:
+  - entity_id: sensor.motion
+    from: Motion Low
+    platform: state
+    to: Motion High
+  condition: []
+  action:
+  - entity_id: switch.green_screen_lights
+    service: switch.turn_on
+- id: '1580022682834'
+  alias: 4x4 Lights Off
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''input_datetime.lights_off_time_4x4'').rsplit('':'',1)[0]
+      == states(''sensor.time'') }} '
+  condition: []
+  action:
+  - data: {}
+    entity_id: switch.peppertentpower
+    service: switch.turn_off
+- id: '1580022801883'
+  alias: 4x4 Lights On
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''input_datetime.lights_on_time_4x4'').rsplit('':'',1)[0]
+      == states(''sensor.time'') }} '
+  condition: []
+  action:
+  - entity_id: switch.peppertentpower
+    service: switch.turn_on
+- id: '1580537356491'
+  alias: Fertigation 1
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''sensor.time'') == states(''input_datetime.fert_1_time_4x4'')[0:5]
+      }}'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.fert_1
+    state: 'on'
+  action:
+  - data: {}
+    entity_id: script.1580541128769
+    service: script.turn_on
+- id: '1580537356492'
+  alias: Fertigation 2
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''sensor.time'') == states(''input_datetime.fert_2_time_4x4'')[0:5]
+      }}'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.fert_2
+    state: 'on'
+  action:
+  - data: {}
+    entity_id: script.1580541128466
+    service: script.turn_on
+- id: '1580537356493'
+  alias: Fertigation 3
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''sensor.time'') == states(''input_datetime.fert_3_time_4x4'')[0:5]
+      }}'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.fert_3
+    state: 'on'
+  action:
+  - data: {}
+    entity_id: script.1580541158469
+    service: script.turn_on
+- id: '1580537356494'
+  alias: Fertigation 4
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''sensor.time'') == states(''input_datetime.fert_4_time_4x4'')[0:5]
+      }}'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.fert_4
+    state: 'on'
+  action:
+  - data: {}
+    entity_id: script.1580541148469
+    service: script.turn_on
+- id: '1580537356495'
+  alias: Fertigation 5
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''sensor.time'') == states(''input_datetime.fert_5_time_4x4'')[0:5]
+      }}'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.fert_5
+    state: 'on'
+  action:
+  - data: {}
+    entity_id: script.1580541138469
+    service: script.turn_on
+- id: '1580570500475'
+  alias: Stir Nute Res
+  description: ''
+  trigger:
+  - minutes: /20
+    platform: time_pattern
+  condition:
+  - above: '3.5'
+    condition: numeric_state
+    entity_id: sensor.water_level
+  action:
+  - entity_id: script.1580570973368
+    service: script.turn_on
+- id: '1581741039410'
+  alias: Empty Basin
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: /30
+  condition:
+  - condition: state
+    entity_id: switch.outlet_1
+    state: 'off'
+  - condition: state
+    entity_id: sensor.drain_basin
+    state: Basin full!
+  - condition: state
+    entity_id: script.1580881541636
+    state: 'off'
+  action:
+  - service: script.1580881541636
+- id: '1581832450467'
+  alias: Nute Stir Pump Minimum Level
+  description: ''
+  trigger:
+  - below: '3.5'
+    entity_id: sensor.water_level
+    for: 00:00:10
+    platform: numeric_state
+  condition: []
+  action:
+  - entity_id: switch.outlet_3
+    service: switch.turn_off
+- id: '1583164496228'
+  alias: Turn Basement Lights Off
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.desktop_ping
+    for: 00:01:00
+    from: 'on'
+    platform: state
+    to: 'off'
+  condition: []
+  action:
+  - entity_id: switch.green_screen_lights
+    service: switch.turn_off
+- id: '1584770765020'
+  alias: Fan High
+  description: ''
+  trigger:
+  - above: '27'
+    entity_id: sensor.pepper_tent_temp
+    platform: numeric_state
+  - above: '65'
+    entity_id: sensor.pepper_tent_humidity
+    platform: numeric_state
+  condition: []
+  action:
+  - data: {}
+    entity_id: switch.tent_fan
+    service: switch.turn_on
+- id: '1584770903455'
+  alias: Fan Low
+  description: ''
+  trigger:
+  - below: '55'
+    entity_id: sensor.pepper_tent_humidity
+    platform: numeric_state
+  condition: []
+  action:
+  - data: {}
+    entity_id: switch.tent_fan
+    service: switch.turn_off
