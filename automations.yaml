@@ -59,7 +59,7 @@
   description: ''
   trigger:
   - platform: time_pattern
-    seconds: /60
+    minutes: "/1"
   condition:
   - condition: template
     value_template: '{{ (float(states(''sensor.atlas_ph''))) >= (float(states(''input_number.target_ph_input''))
@@ -77,7 +77,7 @@
   description: ''
   trigger:
   - platform: time_pattern
-    seconds: /60
+    minutes: "/1"
   condition:
   - condition: template
     value_template: '{{ (float(states(''sensor.atlas_ph''))) <= (float(states(''input_number.target_ph_input''))
@@ -95,7 +95,7 @@
   description: ''
   trigger:
   - below: '23'
-    entity_id: sensor.pepper_tent_temp
+    entity_id: sensor.2x4_temp
     platform: numeric_state
   condition: []
   action:
@@ -106,7 +106,7 @@
   description: ''
   trigger:
   - above: '26'
-    entity_id: sensor.pepper_tent_temp
+    entity_id: sensor.2x4_temp
     platform: numeric_state
   condition: []
   action:
@@ -116,11 +116,11 @@
   alias: Humidifier Start
   description: ''
   trigger:
-  - entity_id: sensor.pepper_tent_humidity
+  - entity_id: sensor.2x4_humidity
     platform: state
   condition:
   - condition: template
-    value_template: '{{(states(''sensor.pepper_tent_humidity'') | float) <= (states(''input_number.humidity_target'')
+    value_template: '{{(states(''sensor.2x4_humidity'') | float) <= (states(''input_number.humidity_target'')
       | float -5.0) }}'
   - condition: state
     entity_id: switch.seedlinghumidifier
@@ -133,11 +133,11 @@
   alias: Humidifier Stop
   description: ''
   trigger:
-  - entity_id: sensor.pepper_tent_humidity
+  - entity_id: sensor.2x4_humidity
     platform: state
   condition:
   - condition: template
-    value_template: '{{(states(''sensor.pepper_tent_humidity'') | float) >= (states(''input_number.humidity_target'')
+    value_template: '{{(states(''sensor.2x4_humidity'') | float) >= (states(''input_number.humidity_target'')
       | float +5.0) }}'
   - condition: state
     entity_id: switch.seedlinghumidifier
@@ -306,8 +306,8 @@
   alias: Stir Nute Res
   description: ''
   trigger:
-  - minutes: /20
-    platform: time_pattern
+  - platform: time_pattern
+    minutes: "/20"
   condition:
   - above: '3.5'
     condition: numeric_state
@@ -320,7 +320,7 @@
   description: ''
   trigger:
   - platform: time_pattern
-    seconds: /30
+    seconds: "/30"
   condition:
   - condition: state
     entity_id: switch.outlet_1
@@ -363,10 +363,10 @@
   description: ''
   trigger:
   - above: '27'
-    entity_id: sensor.pepper_tent_temp
+    entity_id: sensor.2x4_temp
     platform: numeric_state
   - above: '65'
-    entity_id: sensor.pepper_tent_humidity
+    entity_id: sensor.2x4_humidity
     platform: numeric_state
   condition: []
   action:
@@ -378,7 +378,7 @@
   description: ''
   trigger:
   - below: '55'
-    entity_id: sensor.pepper_tent_humidity
+    entity_id: sensor.2x4_humidity
     platform: numeric_state
   condition: []
   action:
