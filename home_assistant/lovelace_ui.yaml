@@ -1,0 +1,592 @@
+title: Indoor Garden
+views:
+  - badges: []
+    cards:
+      - entities:
+          - entity: sensor.tent_temp
+          - entity: sensor.tent_temp_2
+          - entity: sensor.tent_humidity
+          - entity: sensor.tent_humidity_2
+        show_header_toggle: false
+        title: Grow Tent
+        type: entities
+      - detail: 2
+        entity: sensor.water_temp
+        graph: line
+        hours_to_show: 12
+        icon: 'mdi:coolant-temperature'
+        name: Reservoir Water Temp
+        type: sensor
+        unit: C
+      - detail: 2
+        entity: sensor.atlas_ec
+        graph: line
+        icon: 'mdi:alpha-e-circle'
+        name: Reservoir EC
+        type: sensor
+        unit: mS/cm
+      - entity: sensor.control_box_diagnostics
+        graph: line
+        type: sensor
+      - detail: 0
+        entity: sensor.atlas_ph
+        graph: line
+        hours_to_show: 12
+        icon: 'mdi:alpha-p-circle'
+        name: Reservoir pH
+        type: sensor
+        unit: pH
+      - entity: sensor.water_level
+        graph: line
+        name: Reservoir Water Level
+        type: sensor
+      - type: glance
+        entities:
+          - entity: sensor.flood_detection
+          - entity: script.reset_flood_detection
+        show_icon: true
+        show_state: true
+        show_name: true
+      - type: light
+        entity: light.grow_light
+      - type: entity
+        entity: fan.tent_exhaust
+      - type: glance
+        entities:
+          - entity: sensor.drain_basin
+    panel: false
+    path: default_view
+    theme: clear-dark
+    title: Home
+  - badges: []
+    cards:
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: null
+            topic: cal_pH/mid
+        icon: 'mdi:numeric-1-circle'
+        icon_height: 100px
+        name: 'pH Cal Step 1: Mid'
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: entity-button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: null
+            topic: cal_pH/low
+        icon: 'mdi:numeric-2-circle'
+        icon_height: 100px
+        name: 'pH Cal Step 2: Low'
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: entity-button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: null
+            topic: cal_pH/high
+        icon: 'mdi:numeric-3-circle'
+        icon_height: 100px
+        name: 'pH Cal Step 3: High'
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: entity-button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: null
+            topic: cal_EC/dry
+        icon: 'mdi:numeric-1-circle'
+        icon_height: 100px
+        name: 'EC Cal Step 1: Dry'
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: entity-button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: null
+            topic: cal_EC/low
+        icon: 'mdi:numeric-2-circle'
+        icon_height: 100px
+        name: 'EC Cal Step 2: Low'
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: entity-button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: null
+            topic: cal_EC/high
+        icon: 'mdi:numeric-3-circle'
+        icon_height: 100px
+        name: 'EC Cal Step 3: High'
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: entity-button
+      - entities:
+          - entity: sensor.atlas_ph
+          - entity: sensor.atlas_ec
+          - entity: sensor.control_box_diagnostics
+        type: entities
+        show_header_toggle: false
+      - columns: 1
+        entities:
+          - entity: input_number.reading1
+          - entity: input_number.reading2
+          - entity: input_number.reading3
+          - entity: input_number.reading4
+          - entity: input_number.reading5
+          - entity: input_number.reading6
+          - entity: input_number.reading7
+          - entity: input_number.reading8
+          - entity: input_number.reading9
+          - entity: input_number.reading10
+        show_icon: false
+        show_name: true
+        show_state: true
+        title: Last 10 pH Readings
+        type: glance
+      - entities:
+          - entity: input_number.dosing_pwm_0_ph_down
+            name: pH Down
+          - entity: input_number.dosing_pwm_1_calmag
+            name: CalMag
+          - entity: input_number.dosing_pwm_2_micro
+            name: Micro
+          - entity: input_number.dosing_pwm_3_bloom
+            name: Bloom
+          - entity: input_number.dosing_pwm_4_grow
+            name: Grow
+          - entity: input_number.dosing_pwm_5_ph_up
+            name: pH Up
+        type: entities
+        title: Pump Flow Rate PWM
+      - entities:
+          - entity: input_number.dispense_nutes
+            name: Volume
+          - entity: script.1calphdown
+          - entity: script.1calphup
+          - entity: script.1calcalmag
+          - entity: script.1calmicro
+          - entity: script.1calbloom
+          - entity: script.1calgrow
+        type: entities
+        title: Dosing Pump Testing
+      - type: entities
+        entities:
+          - entity: sensor.hx711_cal
+          - entity: script.1scalecalbegin
+          - entity: input_number.scale_cal_factor
+          - entity: script.1scalecalexit
+        title: Mix Res Scale Calibration
+    panel: false
+    path: calibration
+    theme: clear-dark
+    title: Calibration
+  - badges: []
+    cards:
+      - entities:
+          - entity: switch.relay_8ch_1_0
+          - entity: switch.relay_8ch_1_1
+          - entity: switch.relay_8ch_1_2
+          - entity: switch.relay_8ch_1_3
+          - entity: switch.relay_8ch_1_4
+          - entity: switch.relay_8ch_1_5
+          - entity: switch.relay_8ch_1_6
+          - entity: switch.relay_8ch_1_7
+        title: Control Box Relays
+        type: entities
+      - entities:
+          - entity: switch.relay_4ch_1_0
+          - entity: switch.relay_4ch_1_1
+          - entity: switch.relay_4ch_1_2
+          - entity: switch.relay_4ch_1_3
+        title: Powerbar Relays
+        type: entities
+      - entities:
+          - entity: switch.green_screen_lights
+          - entity: switch.tent_humidifier
+          - entity: switch.grow_light
+        title: TP-Link Switches
+        type: entities
+      - entities:
+          - entity: input_number.target_ph_input
+          - entity: input_number.target_ec_input
+          - entity: input_number.calmag_ml_per_liter
+          - entity: input_number.micro_ml_per_liter
+          - entity: input_number.bloom_ml_per_liter
+          - entity: input_number.grow_ml_per_liter
+          - entity: input_number.nutrient_batch_size
+        show_header_toggle: false
+        title: pH and Nute Dosing
+        type: entities
+      - entity: script.1dosenutes
+        hold_action:
+          action: toggle
+        icon: 'mdi:water-pump'
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: entity-button
+      - entities:
+          - entity: input_number.temp_target
+          - entity: input_number.humidity_target
+        show_header_toggle: false
+        title: Climate Targets
+        type: entities
+      - type: entities
+        entities:
+          - entity: switch.ph_down_pump
+          - entity: switch.ph_up_pump
+          - entity: switch.calmag_pump
+          - entity: switch.micro_pump
+          - entity: switch.bloom_pump
+          - entity: switch.grow_pump
+        title: Dosing Pump Control
+        show_header_toggle: false
+    path: relays-and-outlets
+    theme: clear-dark
+    title: Control
+  - badges: []
+    cards:
+      - cards:
+          - entities:
+              - sensor.date
+              - sensor.time
+              - input_datetime.grow_start_date
+              - sensor.days_since_grow_start
+              - sensor.current_week_of_grow
+            show_header_toggle: false
+            title: Date and Time
+            type: entities
+        type: vertical-stack
+      - cards:
+          - entities:
+              - input_number.fertigation_freq
+              - input_number.fertigation_duration
+            show_header_toggle: false
+            title: Fertigations
+            type: entities
+          - card:
+              entities:
+                - input_datetime.fert_1_time_4x4
+              type: entities
+            conditions:
+              - entity: binary_sensor.fert_1
+                state: 'on'
+            type: conditional
+          - card:
+              entities:
+                - input_datetime.fert_2_time_4x4
+              type: entities
+            conditions:
+              - entity: binary_sensor.fert_2
+                state: 'on'
+            type: conditional
+          - card:
+              entities:
+                - input_datetime.fert_3_time_4x4
+              type: entities
+            conditions:
+              - entity: binary_sensor.fert_3
+                state: 'on'
+            type: conditional
+          - card:
+              entities:
+                - input_datetime.fert_4_time_4x4
+              type: entities
+            conditions:
+              - entity: binary_sensor.fert_4
+                state: 'on'
+            type: conditional
+          - card:
+              entities:
+                - input_datetime.fert_5_time_4x4
+              type: entities
+            conditions:
+              - entity: binary_sensor.fert_5
+                state: 'on'
+            type: conditional
+        type: vertical-stack
+      - entities:
+          - entity: input_datetime.lights_on_time_4x4
+          - entity: input_datetime.lights_off_time_4x4
+        show_header_toggle: false
+        title: Lighting Schedule
+        type: entities
+    icon: ''
+    path: schedule
+    theme: clear-dark
+    title: Schedule
+  - badges: []
+    cards:
+      - entity: sensor.memory_free
+        type: sensor
+      - entity: sensor.disk_use_percent_home
+        type: sensor
+    path: hassio-system
+    theme: clear-dark
+    title: Hassio Stats
+  - badges: []
+    cards:
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: Reset
+            topic: lightMeasure/Macros
+        icon: 'mdi:restart'
+        name: Soft Reset
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload_template: 'G21G91Y{{ states("input_number.jog_distance") }}F4000'
+            topic: lightMeasure/Raw
+        icon: 'mdi:arrow-up-bold'
+        name: Jog Y+
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: $X
+            topic: lightMeasure/Raw
+        icon: 'mdi:lock-open'
+        name: Unlock
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload_template: 'G21G91X-{{ states("input_number.jog_distance") }}F4000'
+            topic: lightMeasure/Raw
+        icon: 'mdi:arrow-left-bold'
+        name: Jog X-
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: Stop
+            topic: lightMeasure/Macros
+        icon: 'mdi:stop'
+        name: Stop
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload_template: 'G21G91X{{ states("input_number.jog_distance") }}F4000'
+            topic: lightMeasure/Raw
+        icon: 'mdi:arrow-right-bold'
+        name: Jog X+
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: Confirm
+            topic: lightMeasure/Macros
+        icon: 'mdi:check'
+        name: Confirm
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload_template: 'G21G91Y-{{ states("input_number.jog_distance") }}F4000'
+            topic: lightMeasure/Raw
+        icon: 'mdi:arrow-down-bold'
+        name: Jog Y-
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - entities:
+          - entity: input_number.absolute_position_x_coordinate
+          - entity: input_number.absolute_position_y_coordinate
+          - entity: input_number.jog_distance
+        title: My Title
+        type: entities
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload_template: >-
+              G21G90X{{ states("input_number.absolute_position_x_coordinate")
+              }}Y{{ states("input_number.absolute_position_y_coordinate")
+              }}F4000  
+            topic: lightMeasure/Raw
+        icon: 'mdi:target'
+        name: Go to Absolute Position
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: $H
+            topic: lightMeasure/Raw
+        icon: 'mdi:home'
+        name: Home
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: more-info
+        icon: 'mdi:numeric-0'
+        name: Return to Zero
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: toggle
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: 5x5-3
+            topic: lightMeasure/Macros
+        icon: 'mdi:numeric-5'
+        icon_height: 100px
+        name: 5x5
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: 4x4-3
+            topic: lightMeasure/Macros
+        icon: 'mdi:numeric-4'
+        icon_height: 100px
+        name: 4x4
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: 3x3-3
+            topic: lightMeasure/Macros
+        icon: 'mdi:numeric-3'
+        icon_height: 100px
+        name: 3x3
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: 2x2-3
+            topic: lightMeasure/Macros
+        icon: 'mdi:numeric-2'
+        icon_height: 100px
+        name: 2x2
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: 2x4-3
+            topic: lightMeasure/Macros
+        icon: 'mdi:numeric-2'
+        icon_height: 100px
+        name: 2x4
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - entities:
+          - entity: sensor.lightmeasure_feedback
+          - entity: sensor.lightmeasure_recording
+        title: My Title
+        type: entities
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: Pause
+            topic: lightMeasure/Macros
+        icon: 'mdi:pause'
+        name: Pause
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+    path: light-measure
+    theme: clear-dark
+    title: Light Measure
