@@ -1,3 +1,5 @@
+#To add any of this to your dashboard, click the 3 vertical dots in the top right, select "edit dashboard", then click the 3 dots again and select "Raw configuration editor".
+
 title: Indoor Garden
 views:
   - badges: []
