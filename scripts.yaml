@@ -1,0 +1,208 @@
+1fertigate1:
+  alias: Fertigation Event 1
+  sequence:
+  - entity_id: switch.relay_4ch_1_2                     # Turn on the fertigation pump for the duration set by the input number on UI, then turn off.
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_off
+1fertigate2:
+  alias: Fertigation Event 2
+  sequence:
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_off
+1fertigate3:
+  alias: Fertigation Event 3
+  sequence:
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_off
+1fertigate4:
+  alias: Fertigation Event 4
+  sequence:
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_off
+1fertigate5:
+  alias: Fertigation Event 5
+  sequence:
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_on
+  - delay: '{{ states(''input_number.fertigation_duration'') | multiply(60) | timestamp_custom(''%H:%M:%S'',False)
+      }}'
+  - entity_id: switch.relay_4ch_1_2
+    service: switch.turn_off
+1stirnuteres:
+  alias: Stir Nute Res
+  sequence:
+  - entity_id: switch.relay_4ch_1_1                         # Turn on mixing res stir pump for 5 minutes. This gets called by the stir nute res automation, every 20 minutes.
+    service: switch.turn_on
+  - delay: 00:05:00
+  - entity_id: switch.relay_4ch_1_1
+    service: switch.turn_off
+1dosenutes:
+  alias: Dose Nutrients
+  sequence:
+  - entity_id: automation.ph_down_dosing                     #  Turn off ph down and ph up dosing so it doesn't go crazy when making fresh batch of nutes.
+    service: automation.turn_off
+  - entity_id: automation.ph_up_dosing
+    service: automation.turn_off
+  - condition: template
+    value_template: '{{ (states("sensor.water_level") | float) < (states("input_number.nutrient_batch_size")	
+      | float) }}'                                  #  If the batch size set by the UI input number slider is greater than what's currently in the res, proceed.
+  - entity_id: switch.relay_4ch_1_0
+    service: switch.turn_on
+  - wait_template: '{{ (states("sensor.water_level") | float) >= (states("input_number.nutrient_batch_size")
+      | float) }}'                                  # Start filling the mix res with RO water and wait until the res has the amount of water set by UI slider.
+  - entity_id: switch.relay_4ch_1_0
+    service: switch.turn_off
+  - entity_id: switch.relay_4ch_1_1
+    service: switch.turn_on
+  - delay: 00:00:05
+  - entity_id: switch.relay_8ch_1_0                 # Turn on the nute jar magnetic stirrers
+    service: switch.turn_on
+  - data:
+      payload_template: 1:{{ (states("input_number.calmag_ml_per_liter") | int) *
+        (states("input_number.nutrient_batch_size") | int) * (300) }}   # Send out appropriate on-time to ESP32 for each pump on time. It's multiplied by 300 because the pump should be calibrated to produce 1mL per 300ms.
+      topic: control/dosing
+    service: mqtt.publish
+  - delay: 00:01:00
+  - data:
+      payload_template: 2:{{ (states("input_number.micro_ml_per_liter") | int) * (states("input_number.nutrient_batch_size")
+        | int) * (300) }}
+      topic: control/dosing
+    service: mqtt.publish
+  - delay: 00:01:00
+  - data:
+      payload_template: 3:{{ (states("input_number.bloom_ml_per_liter") | int) * (states("input_number.nutrient_batch_size")
+        | int) * (300) }}
+      topic: control/dosing
+    service: mqtt.publish
+  - delay: 00:01:00
+  - data:
+      payload_template: 4:{{ (states("input_number.grow_ml_per_liter") | int) * (states("input_number.nutrient_batch_size")
+        | int) * (300) }}
+      topic: control/dosing
+    service: mqtt.publish
+  - entity_id: switch.relay_8ch_1_0
+    service: switch.turn_off
+  - delay: 00:01:00
+  - entity_id: switch.relay_4ch_1_0
+    service: switch.turn_on
+  - timeout: 00:08:00
+    wait_template: '{{ (states("input_number.target_ec_input") | float) >= (states("sensor.atlas_ec")
+      | float) }}'                      # Start filling mix res with water again until the desired EC is achieved.
+  - entity_id: switch.relay_4ch_1_0
+    service: switch.turn_off
+  - entity_id: automation.ph_down_dosing
+    service: automation.turn_on
+  - entity_id: automation.ph_up_dosing
+    service: automation.turn_on
+  - data_template:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'   # Turn all the automations back on and update the "last nute batch" date to help keep track.
+      entity_id: input_datetime.last_nute_batch
+    service: input_datetime.set_datetime
+1emptybasin:
+  alias: Empty Drain Basin
+  sequence:
+  - delay: 00:00:30
+  - entity_id: switch.relay_4ch_1_3
+    service: switch.turn_on
+  - wait_template: '{{  is_state(''sensor.drain_basin'', ''Basin OK'')  }}' # Turn on drain basin pump, wait until the float sensor resets (up to 8 mins, then it times out), then run the pump for another minute. Massage this delay as needed.
+    timeout: 00:08:00
+  - delay: 00:01:00
+  - entity_id: switch.relay_4ch_1_3
+    service: switch.turn_off
+1calphdown:
+  alias: Calibrate pH Down Pump
+  sequence:
+  - data:
+      payload_template: 00:{{ (states('input_number.dispense_nutes')) | int *300 }} # This is for calibrating the pumps. Set the input slider for nute amount, then execute each script and see how much pump gives. 
+      topic: control/dosing                                                         # Adjust pump PWM with other input # until desired amount matches measured amount.
+    service: mqtt.publish
+1calcalmag:
+  alias: Calibrate CalMag Pump
+  sequence:
+  - data:
+      payload_template: 01:{{ (states('input_number.dispense_nutes')) | int *300 }}
+      topic: control/dosing
+    service: mqtt.publish
+1calmicro:
+  alias: Calibrate Micro Pump
+  sequence:
+  - data:
+      payload_template: 02:{{ (states('input_number.dispense_nutes')) | int *300 }}
+      topic: control/dosing
+    service: mqtt.publish
+1calbloom:
+  alias: Calibrate Bloom Pump
+  sequence:
+  - data:
+      payload_template: 03:{{ (states('input_number.dispense_nutes')) | int *300 }}
+      topic: control/dosing
+    service: mqtt.publish
+1calgrow:
+  alias: Calibrate Grow Pump
+  sequence:
+  - data:
+      payload_template: 04:{{ (states('input_number.dispense_nutes')) | int *300 }}
+      topic: control/dosing
+    service: mqtt.publish
+1calphup:
+  alias: Calibrate pH Up Pump
+  sequence:
+  - data:
+      payload_template: 05:{{ (states('input_number.dispense_nutes')) | int *300 }}
+      topic: control/dosing
+    service: mqtt.publish
+1scalecalbegin:
+  alias: Begin Calibration
+  sequence:
+  - data:
+      payload: Begin
+      topic: calibrate/scale
+    service: mqtt.publish
+1scalecalexit:
+  alias: Save and Exit
+  sequence:
+  - data:
+      payload: Exit
+      topic: calibrate/scale
+    service: mqtt.publish
+reset_flood_detection:              #Reset everything after fixing flood. 
+  alias: Reset Flood Detection
+  sequence:
+  - service: automation.turn_on
+    data: {}
+    entity_id: automation.fertigation_1
+  - service: automation.turn_on
+    data: {}
+    entity_id: automation.fertigation_2
+  - service: automation.turn_on
+    data: {}
+    entity_id: automation.fertigation_3
+  - service: automation.turn_on
+    data: {}
+    entity_id: automation.fertigation_4
+  - service: automation.turn_on
+    data: {}
+    entity_id: automation.fertigation_5
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.relay_8ch_1_1
+  - service: mqtt.publish
+    data:
+      topic: feedback/flood
+      payload: Dry
+  mode: single
