@@ -47,7 +47,6 @@ struct hx711CalVals
   long zeroFactor;
 };
 hx711CalVals mixingRes;
-int eeAddress = 0;
 
 // Atlas 
 int channel;                                    // For channel switching - 0-7 serial, 8-127 I2C addresses
@@ -95,9 +94,12 @@ int relayPins[2][8]
 
 void setup()
 {
+  int cfAddress = 0;                             // Address in EEPROM memory of HX711 calibration factor
+  int zfAddress = 4;                             // Address of HX711 zero factor
   Serial3.begin(baudRate);
   Serial.begin(baudRate);
-  Wire.begin();                                   
+  Wire.begin();  
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);                                 
   floodStartMillis = 0;
   pinMode(DRAIN_SENSOR_PIN, INPUT_PULLUP);
 
@@ -109,6 +111,8 @@ void setup()
       digitalWrite(relayPins[i][j], HIGH);
     }
   }
+  EEPROM.get(cfAddress, mixingRes.calibrationFactor);
+  EEPROM.get(zfAddress, mixingRes.zeroFactor);
   setupScale();
   Serial.println("Setup complete, starting loop!");
 }
@@ -242,9 +246,14 @@ void processSerialData()
           }
           case 'E':                                                 // Exit cal mode
           {
+            int cfAddress = 0;
+            int zfAddress = 4;
             scaleCalMode = false;
-            EEPROM.put(eeAddress, mixingRes);                       // Write CF and ZF to eeprom so it's immediately recalled when the Mega reboots.
-            Serial3.print("<HX711: Cal saved to EEPROM!>");
+            EEPROM.put(cfAddress, mixingRes.calibrationFactor);
+            EEPROM.put(zfAddress, mixingRes.zeroFactor); 
+            Serial3.print("<HX711: Calibration saved to EEPROM!>");
+            Serial.println(mixingRes.calibrationFactor);
+            Serial.println(mixingRes.zeroFactor);
             scale.tare();                                           // Tare the scale. Before you save and exit, the reservoir and any equipment that sit in it should be on the sensor,
             break;                                                  // however, the weights you use to calibrate it must be removed. Only the stuff that will be permanent should stay.
           }
@@ -419,31 +428,43 @@ void triggerRelay(int boardNumber, int relayNumber, int relayTrigger)
 void setupScale()
 {  
   char buff[80];
-  EEPROM.get(eeAddress, mixingRes);
-  delay(500);
-  sprintf(buff, "<HX711: Loaded calibration factor of %d and zero factor of %d>", mixingRes.calibrationFactor, mixingRes.zeroFactor);
+  sprintf(buff, "<HX711: Loaded calibration factor of %ld and zero factor of %ld>", mixingRes.calibrationFactor, mixingRes.zeroFactor);
   Serial3.println(buff);
   Serial.println(buff);
-  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
   scale.set_scale(mixingRes.calibrationFactor);               // Assign calibration factor from calibration process below
+  delay(500);
   scale.set_offset(mixingRes.zeroFactor);                     // Zero out the scale using zero_factor from calibration process below
 }
 
 void beginCalMode()
 {
+  char buff[80];
   scaleCalMillis = currentMillis;
   Serial3.println("<HX711: Calibration starting.>");
   delay(1500);
-  Serial3.println("<HX711: After readings begin, place known weight on scale...>");
-  delay(1500);
-  Serial3.println("<HX711: adjust calibration factor...>");
-  delay(1500);
-  Serial3.println("<HX711: then remove weight and save.>");
-  delay(1000);
+  for(int i = 10; i >= 0; i--)
+  {
+    sprintf(buff, "<HX711: Remove ALL weight from sensors. You have %d seconds...>", i);
+    Serial3.print(buff);
+    delay(1000);
+  }
+  Serial3.println("<HX711: Taring scale...>");
+  delay(2000);
   scale.set_scale();
   scale.tare(); //Reset the scale to 0
   mixingRes.calibrationFactor = -20000;
+  for(int i = 10; i >= 0; i--)
+  {
+    sprintf(buff, "<HX711: Place stuff to be zeroed out on scale now! You have %d seconds...>", i);
+    Serial3.print(buff);
+    delay(1000);
+  }
+  Serial3.println("<HX711: Applying zero factor. Adjust calibration factor now.>");
   mixingRes.zeroFactor = scale.read_average(); //Get a baseline reading
+  Serial.print("zero factor: ");
+  Serial.println(mixingRes.zeroFactor);
+  scale.set_offset(mixingRes.zeroFactor);
+  delay(1500);
   scaleCalMode = true;
 }
 
