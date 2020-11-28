@@ -1,0 +1,72 @@
+esphome:
+  name: grow_tent
+  platform: ESP32
+  board: esp-wrover-kit
+
+wifi:
+  ssid: !secret WIFI
+  password: !secret WIFIPASS
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+i2c:
+
+sensor:
+  - platform: bme280
+    temperature:
+      name: "Tent Temp"
+      filters:
+        - offset: 0.0
+    humidity:
+      name: "Tent Humidity"
+      filters:
+        - offset: 0.0
+    address: 0x76
+    update_interval: 30s
+  - platform: bme280
+    temperature:
+      name: "Tent Temp_2"
+      filters:
+        - offset: 0.4
+    humidity:
+      name: "Tent Humidity_2"
+      filters:
+        - offset: 4.0
+    address: 0x77
+    update_interval: 30s    
+    
+output:
+  - platform: ledc
+    pin: 27
+    frequency: 1220 Hz
+    inverted: true
+    id: growlight_pwm
+    channel: 0
+  - platform: ledc
+    pin: 25
+    frequency: 6180 Hz
+    id: cloudline_pwm
+    channel: 2
+    
+light:
+  - platform: monochromatic
+    name: "Grow Light"
+    output: growlight_pwm
+    gamma_correct: 1.0
+    
+fan:
+  - platform: speed
+    output: cloudline_pwm
+    name: "Tent Exhaust" 
+    speed:
+      low: .05
+      medium: .2
+      high: 1
