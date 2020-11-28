@@ -52,7 +52,7 @@ const char* password = "YOUR___PASS";
 const char* mqtt_server = "YOUR___MQTTSERVERIP";
 WiFiClient espClient;
 PubSubClient client(espClient);
-const byte numChars = 60;
+const byte numChars = 100;
 char receivedChars[numChars];
 boolean newData = false;                            //Is there new data coming in over the serial port from the Arduino Mega?
 
