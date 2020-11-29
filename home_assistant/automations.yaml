@@ -9,13 +9,10 @@
   - data:
       data:
         push:
-          sound:
-            critical: 1
-            name: default
-            volume: 1
+          sound: US-EN-Morgan-Freeman-Water-Detected-In-Basement.wav
       message: '{{ (states("sensor.flood_detection")) }}'
       title: Flood Detected!
-    service: notify.ios_ryphone
+    service: notify.mobile_app_ryphone
   - entity_id: switch.relay_8ch_1_1
     service: switch.turn_on
   - entity_id: automation.fertigation_1
