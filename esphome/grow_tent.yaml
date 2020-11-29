@@ -63,7 +63,7 @@ light:
     gamma_correct: 1.0
     
 fan:
-  - platform: speed
+  - platform: speed     # Note - this is for the old style of Cloudline T6 that has a DC motor, not EC motor.
     output: cloudline_pwm
     name: "Tent Exhaust" 
     speed:
