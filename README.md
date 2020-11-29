@@ -2,6 +2,8 @@
 
 I'm new to github and writing code in general so please bear with me. This project is literally my first go at programming something and I'm having a blast. Experienced programmers may be scratching their heads at the way I've done some things but I'm learning and am always looking to improve. Over the past few weeks I've been trying to clean up my code and add as many useful comments as I can. Since I first posted my Home Assistant configuration files, I've made some significant changes to my MQTT topics and payloads that go back and forth between the Pi and the control box in order to make things more understandable and logical. I hope I've succeeded in my goal.
 
+**I want to stress that I'm just a hobbyist and am not guaranteeing any of my electronics work or code. I'm no expert but am eager to share what I have, and while this system works for me, if you decide to make use of any of its components, it's up to you to vet yours and ensure everything is safe and compatible.** 
+
 This Home Assistant project is now running on a Raspberry Pi 4 and is a mish-mash of many components. Here are its current capabilities:
 - Measure temperature and humidity in control box and grow tent
 - Measure water level, temperature, pH, and conductivity in nutrient mix reservoir
