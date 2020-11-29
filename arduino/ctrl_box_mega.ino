@@ -19,11 +19,10 @@
   - To calibrate the scale:
     - Remove everything from the load cells. They should have abosolutely nothing resting on them. 
     - Initiate the "begin scale calibration" script from Home Assistant calibration page.
-    - Add a known metric weight (mass) on top of the scale. E.g. - a 2Kg board plus a 20Kg weight
+    - Follow instructions that are sent over MQTT.
     - You will be measuring in Kg, not lbs, so be sure to convert whatever you're measuring to Kg.
     - Adjust the calibration factor using the input on the Home Assistant calibration page.
-    - When the scale readout matches the weight you're calibrating with, remove the calibration weight and replace it with the reservoir and
-      whatever other devices will be permanently mounted in it (pumps, etc.).
+    - When the scale readout matches the weight you're calibrating with, remove the calibration weight.
     - When you execute the "Save and exit" script in HA, it will save the calibaration value you've set, then tare the scale, so it will read 0.0 
       when you're finished. Since 1 liter of water has the same mass as 1 Kilogram, your scale will now show you how much water, in liters, is in the res.
 ***********************************************************************************************************************************************/
@@ -459,7 +458,7 @@ void beginCalMode()
     Serial3.print(buff);
     delay(1000);
   }
-  Serial3.println("<HX711: Applying zero factor. Adjust calibration factor now.>");
+  Serial3.println("<HX711: Zero factor applied. Add known weight now and adjust calibration factor.>");
   mixingRes.zeroFactor = scale.read_average(); //Get a baseline reading
   Serial.print("zero factor: ");
   Serial.println(mixingRes.zeroFactor);
