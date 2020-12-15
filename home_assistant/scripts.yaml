@@ -102,7 +102,7 @@
     service: switch.turn_on
   - timeout: 00:08:00
     wait_template: '{{ (states("input_number.target_ec_input") | float) >= (states("sensor.atlas_ec")
-      | float) }}'                      # Start filling mix res with water again to dilute mix desired EC is achieved. MODIFY THIS TO PUT A SAFETY IN PLACE TO PREVENT OVERFILLING!
+      | float) }}'                      # Start filling mix res with water again to dilute mix until desired EC is achieved. MODIFY THIS TO PUT SAFETY IN PLACE TO PREVENT OVERFILLING!
   - entity_id: switch.relay_4ch_1_0     
     service: switch.turn_off
   - entity_id: automation.ph_down_dosing
