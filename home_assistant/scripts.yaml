@@ -59,8 +59,8 @@
   - entity_id: automation.ph_up_dosing
     service: automation.turn_off
   - condition: template
-    value_template: '{{ (states("sensor.water_level") | float) < (states("input_number.nutrient_batch_size")	
-      | float) }}'                                  #  If the batch size set by the UI input number slider is greater than what's currently in the res, proceed.
+    value_template: '{{ (states("sensor.water_level") | float) < (states("input_number.nutrient_batch_size")
+      | float) }}'                                  #  If the batch size set by the UI input number slider is greater than whats currently in the res, proceed.
   - entity_id: switch.relay_4ch_1_0
     service: switch.turn_on
   - wait_template: '{{ (states("sensor.water_level") | float) >= (states("input_number.nutrient_batch_size")
@@ -101,9 +101,9 @@
   - entity_id: switch.relay_4ch_1_0
     service: switch.turn_on
   - timeout: 00:08:00
-    wait_template: '{{ (states("input_number.target_ec_input") | float) >= (states("sensor.atlas_ec")
-      | float) }}'                      # Start filling mix res with water again to dilute mix until desired EC is achieved. MODIFY THIS TO PUT SAFETY IN PLACE TO PREVENT OVERFILLING!
-  - entity_id: switch.relay_4ch_1_0     
+    wait_template: '{{ (states("input_number.target_ec_input") | float) >= (states("sensor.atlas_ec") | float)
+        or ((states("sensor.water_level") | float) >= (states("input_number.nutrient_res_max_volume") | float) -5) }}' # Start filling mix res with water again until the desired EC is achieved OR res max level -5L is hit.
+  - entity_id: switch.relay_4ch_1_0
     service: switch.turn_off
   - entity_id: automation.ph_down_dosing
     service: automation.turn_on
