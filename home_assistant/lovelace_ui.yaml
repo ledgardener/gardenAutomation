@@ -66,8 +66,8 @@ views:
           action: call-service
           service: mqtt.publish
           service_data:
-            payload: null
-            topic: cal_pH/mid
+            payload: mid
+            topic: calibrate/atlas_pH
         icon: 'mdi:numeric-1-circle'
         icon_height: 100px
         name: 'pH Cal Step 1: Mid'
@@ -80,8 +80,8 @@ views:
           action: call-service
           service: mqtt.publish
           service_data:
-            payload: null
-            topic: cal_pH/low
+            payload: low
+            topic: calibrate/atlas_pH
         icon: 'mdi:numeric-2-circle'
         icon_height: 100px
         name: 'pH Cal Step 2: Low'
@@ -94,8 +94,8 @@ views:
           action: call-service
           service: mqtt.publish
           service_data:
-            payload: null
-            topic: cal_pH/high
+            payload: high
+            topic: calibrate/atlas_pH
         icon: 'mdi:numeric-3-circle'
         icon_height: 100px
         name: 'pH Cal Step 3: High'
@@ -108,8 +108,8 @@ views:
           action: call-service
           service: mqtt.publish
           service_data:
-            payload: null
-            topic: cal_EC/dry
+            payload: dry
+            topic: calibrate/atlas_EC
         icon: 'mdi:numeric-1-circle'
         icon_height: 100px
         name: 'EC Cal Step 1: Dry'
@@ -122,8 +122,8 @@ views:
           action: call-service
           service: mqtt.publish
           service_data:
-            payload: null
-            topic: cal_EC/low
+            payload: low
+            topic: calibrate/atlas_EC
         icon: 'mdi:numeric-2-circle'
         icon_height: 100px
         name: 'EC Cal Step 2: Low'
@@ -136,8 +136,8 @@ views:
           action: call-service
           service: mqtt.publish
           service_data:
-            payload: null
-            topic: cal_EC/high
+            payload: high
+            topic: calibrate/atlas_EC
         icon: 'mdi:numeric-3-circle'
         icon_height: 100px
         name: 'EC Cal Step 3: High'
