@@ -1,5 +1,4 @@
 #To add any of this to your dashboard, click the 3 vertical dots in the top right, select "edit dashboard", then click the 3 dots again and select "Raw configuration editor".
-
 title: Indoor Garden
 views:
   - badges: []
@@ -220,13 +219,6 @@ views:
         title: Control Box Relays
         type: entities
       - entities:
-          - entity: switch.relay_4ch_1_0
-          - entity: switch.relay_4ch_1_1
-          - entity: switch.relay_4ch_1_2
-          - entity: switch.relay_4ch_1_3
-        title: Powerbar Relays
-        type: entities
-      - entities:
           - entity: switch.green_screen_lights
           - entity: switch.tent_humidifier
           - entity: switch.grow_light
@@ -240,18 +232,10 @@ views:
           - entity: input_number.bloom_ml_per_liter
           - entity: input_number.grow_ml_per_liter
           - entity: input_number.nutrient_batch_size
+          - entity: input_number.nutrient_res_max_volume
         show_header_toggle: false
         title: pH and Nute Dosing
         type: entities
-      - entity: script.1dosenutes
-        hold_action:
-          action: toggle
-        icon: 'mdi:water-pump'
-        show_icon: true
-        show_name: true
-        tap_action:
-          action: none
-        type: entity-button
       - entities:
           - entity: input_number.temp_target
           - entity: input_number.humidity_target
@@ -268,6 +252,37 @@ views:
           - entity: switch.grow_pump
         title: Dosing Pump Control
         show_header_toggle: false
+      - entity: script.1dosenutes
+        hold_action:
+          action: toggle
+        icon: 'mdi:water-pump'
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: entity-button
+      - type: markdown
+        content: >-
+          First, make sure to set the \"Nute Res Max Volume\" input number to
+          the max volume your reservoir can hold. Then set the batch size, and
+          choose your nutrient ratios. Pick a pH and EC target as well. Hold the
+          big "Dose Nutrients" button to start the process. 
+
+
+          The system will fill the reservoir with fresh water up until the batch
+          size number is hit. It will then dispense nutrients at the chosen
+          ratios. After dispensing nutrients, it will continue to fill the
+          reservoir with fresh water and dilute the mix down until the target EC
+          is hit. If the reservoir reaches the max volume number you set (minus
+          5), before hitting the target EC, the dilution will stop.
+        title: How to Dose a Batch of Nutrients
+      - entities:
+          - entity: switch.relay_4ch_1_0
+          - entity: switch.relay_4ch_1_1
+          - entity: switch.relay_4ch_1_2
+          - entity: switch.relay_4ch_1_3
+        title: Powerbar Relays
+        type: entities
     path: relays-and-outlets
     theme: clear-dark
     title: Control
@@ -584,6 +599,22 @@ views:
             topic: lightMeasure/Macros
         icon: 'mdi:pause'
         name: Pause
+        show_icon: true
+        show_name: true
+        tap_action:
+          action: none
+        type: button
+      - type: button
+        tap_action:
+          action: toggle
+        entity: switch.ppfd_light
+      - hold_action:
+          action: call-service
+          service: mqtt.publish
+          service_data:
+            payload: T
+            topic: lightMeasure/Macros
+        name: Take Measurement
         show_icon: true
         show_name: true
         tap_action:
