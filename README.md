@@ -18,6 +18,16 @@ This Home Assistant project is now running on a Raspberry Pi 4 and is a mish-mas
 
 The Pi running Home Assistant is boss in this system. It has no physical I/O hooked up to it at all - it just sits on the network and communicates over MQTT with the ESP32 in the control box. You will need to install the MQTT Broker add-on in Home Assistant. The ESP32 has a lot of I/O hooked up to it, and it also communicates with the Arduino Mega via Serial, which handles some physical I/O and has the Tentacle shield on it that talks to the Atlas sensors. The ESP32 relays data from the Pi to the Mega and vice versa since the Mega has no network connection.
 
+I have the following add-ons installed in Home Assistant:
+- Duck DNS (remote access)
+- NGINX (remote access)
+- ESPHome (makes config of ESP8266 and ESP32 super easy)
+- File Editor (edit yaml files from home assistant interface)
+- MariaDB (better database than the stock one)
+- Mosquitto broker (required to facilitate communication between ESP32 in control box and Home Assistant)
+- Samba share (allows you to access folders on the Pi from windows)
+- Terminal & SSH (in case things go south and I need to putty in)
+
 I've done my best to draw out the entire system down to conductor level, and have uploaded a diagram here as well. Don't even bother trying to view it in github's preview panel - open the .png up on your computer instead since it's huge. Once you open it, if you try to zoom in on something, you may need to be patient and let it load. The resolution is definitely there and if you give it time, when it renders, you'll be able to zoom in and see pin numbers nice and sharp. 
 
 I've also included a parts list for everything in the system with links to all parts as well. 
