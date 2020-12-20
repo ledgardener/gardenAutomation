@@ -437,13 +437,10 @@ void processSerialData()
     {
       case 'P':                                                                                      // If message starts with 'P' (pH)
         {
-          if ((receivedChars[4] = '.') && (receivedChars[3] != '0'))                                 // If it's a good reading (not 0), publish it to Home Assistant via MQTT.
-          {
             char* strtokIndx;
-            strtokIndx = strtok(receivedChars, ":");                                                // Skip the first segment which is the 'R' characterpumpNumber = atoi(strtokIndx);
+            strtokIndx = strtok(receivedChars, ":");                                                // Skip the first segment which is the identifier
             strtokIndx = strtok(NULL, ":");
             client.publish("feedback/atlas_pH", strtokIndx);
-          }
           if (receivedChars[8] == '3')
           {
             client.publish("feedback/general", "pH Cal Successful!");   // When we ask the pH EZO circuit above how many points it has calibrated, if it responds with a 3 here, publish success message to HA.
@@ -453,14 +450,11 @@ void processSerialData()
 
       case 'E':                                                                                     // If message starts with 'E' (EC)
         {
-          if ((receivedChars[4] = '.') && (receivedChars[3] != '0'))                                // If it's a good reading (not 0), publish it to Home Assistant via MQTT.
-          {
             char* strtokIndx;
-            strtokIndx = strtok(receivedChars, ":");                                                 // Skip the first segment which is the 'R' characterpumpNumber = atoi(strtokIndx);
+            strtokIndx = strtok(receivedChars, ":");                                                 // Skip the first segment which is the identifier;
             strtokIndx = strtok(NULL, ":");
             client.publish("feedback/atlas_EC", strtokIndx);
-          }
-          if (receivedChars[8] == '3')
+          if (receivedChars[8] == '2')                                                            // EC is considered 2 point calibration for some reason (dry, low, high)
           {
             client.publish("feedback/general", "EC Cal Successful!");
           }
@@ -476,7 +470,7 @@ void processSerialData()
       case 'W':
         {
           char* strtokIndx;
-          strtokIndx = strtok(receivedChars, ":");                   // Skip the first segment which is the 'R' characterpumpNumber = atoi(strtokIndx);
+          strtokIndx = strtok(receivedChars, ":");                   // Skip the first segment 
           strtokIndx = strtok(NULL, ":");
           client.publish("feedback/waterLevel", strtokIndx);
           break;
