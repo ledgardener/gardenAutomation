@@ -45,6 +45,9 @@ const unsigned long tempCheckPeriod = 30000;         // How long to wait, in mil
 const unsigned long tempCompPeriod = 600000;         // How long to wait, in milliseconds, between sending temperature compensation factor to ezo pH circuit
 unsigned long atlasPeriod = 5000;                    // How long to wait, in milliseconds, between polling Atlas sensors for values
 unsigned long dosingPumpPeriod[6];                   // Array of modifiable "pump on" times that are sent by Home Assistant. These determine how long to keep pump on before shutting off.
+// Fan control variables
+unsigned long fanLastCommandTime = millis();         // Timer to track when last fan command was sent
+const unsigned long fanTimeout = 10000;              // Timeout period in milliseconds to ensure fan doesn't stop due to control system failure
 
 // WiFi/MQTT/Serial
 const char* ssid = "YOUR___SSID";
@@ -72,6 +75,12 @@ const int dosingPumpPWMpin[6]
   18, 32, 25, 27, 12, 5
 };
 const int pwmNoctuaFanPin = 15;
+
+// Fan control variables
+float fanTempSetpoint = 25.0;     // Temperature setpoint for fan activation (default 25°C)
+float fanHumiditySetpoint = 60.0; // Humidity setpoint for fan activation (default 60%)
+String fanMode = "auto";          // Fan mode: "auto" or "manual"
+int manualFanSpeed = 125;         // Manual fan speed setting (0-255)
 
 // PWM properties
 const int freq = 5000;
@@ -252,6 +261,35 @@ void callback(char* topic, byte* payload, unsigned int length)
         }
     }
   }
+
+  /***************** CALLBACK: Fan Control *****************/
+  // Handle temperature setpoint updates from Home Assistant
+  if (strcmp(topic, "control/fan/temperature_setpoint") == 0) {
+    fanTempSetpoint = atof(payloadStr);
+    // Send confirmation back to Home Assistant
+    client.publish("feedback/fan/temperature_setpoint", payloadStr);
+  }
+  
+  // Handle humidity setpoint updates from Home Assistant
+  if (strcmp(topic, "control/fan/humidity_setpoint") == 0) {
+    fanHumiditySetpoint = atof(payloadStr);
+    // Send confirmation back to Home Assistant
+    client.publish("feedback/fan/humidity_setpoint", payloadStr);
+  }
+  
+  // Handle fan mode updates from Home Assistant
+  if (strcmp(topic, "control/fan/mode") == 0) {
+    fanMode = payloadStr;
+    // Send confirmation back to Home Assistant
+    client.publish("feedback/fan/mode", payloadStr);
+  }
+  
+  // Handle manual fan speed updates from Home Assistant (when in manual mode)
+  if (strcmp(topic, "control/fan/speed") == 0) {
+    manualFanSpeed = atoi(payloadStr);
+    // Send confirmation back to Home Assistant
+    client.publish("feedback/fan/speed", payloadStr);
+  }
 }
 
 void reconnect()
@@ -345,6 +383,10 @@ void loop()                                                                     
   {
     getWaterTemp();
     getBoxTemp();
+    
+    // Enhanced fan control based on temperature and humidity readings
+    controlFanBasedOnConditions(boxTemperature, humidity);
+    
     tempCheckMillis = currentMillis;
   }
 
@@ -385,6 +427,14 @@ void loop()                                                                     
   
   recvWithStartEndMarkers();                                            // Gather data sent from Mega over serial
   processSerialData();
+  
+  // Enhanced fan control with watchdog mechanism
+  // Check if fan control has timed out and ensure fan continues operation
+  if (fanLastCommandTime > 0 && (currentMillis - fanLastCommandTime > fanTimeout)) {
+    // If no command received in timeout period, run fan at minimum safe speed
+    ledcWrite(pwmChannel[NOCTUA], 150);  // Safe minimum speed
+  }
+
   client.loop();                                                       // MQTT client loop is required at end of void loop().
 }
 
@@ -514,6 +564,58 @@ void processSerialData()
   }
 }
 
+// Function to control fan based on temperature and humidity conditions with setpoints
+// This function adjusts fan speed automatically based on sensor readings and user-defined setpoints
+void controlFanBasedOnConditions(float temperature, float humidity) {
+  // Check if fan control is in manual mode
+  if (fanMode == "manual") {
+    // Use manual speed setting
+    ledcWrite(pwmChannel[NOCTUA], manualFanSpeed);
+    fanLastCommandTime = millis();
+    return;
+  }
+  
+  // Auto mode - use setpoints for fan control logic
+  int fanSpeed = 0;
+  
+  // If temperature is above threshold, set appropriate fan speed
+  if (temperature > fanTempSetpoint) {
+    // Calculate temperature difference from setpoint
+    float tempDiff = temperature - fanTempSetpoint;
+    
+    // Increase fan speed based on how much above threshold
+    fanSpeed = 100 + (tempDiff * 10);  // Scale fan speed with temperature difference
+    
+    // Ensure fan doesn't exceed maximum speed
+    if (fanSpeed > 255) {
+      fanSpeed = 255;
+    }
+    
+    // Add humidity consideration (if humidity is also above setpoint, increase fan speed further)
+    if (humidity > fanHumiditySetpoint) {
+      float humidityDiff = humidity - fanHumiditySetpoint;
+      fanSpeed += humidityDiff * 2;  // Additional speed for high humidity
+      
+      // Ensure max speed is not exceeded
+      if (fanSpeed > 255) {
+        fanSpeed = 255;
+      }
+    }
+  }
+  
+  // Apply calculated fan speed
+  if (fanSpeed > 0) {
+    ledcWrite(pwmChannel[NOCTUA], fanSpeed);
+  } else {
+    // Turn fan off when below setpoint
+    ledcWrite(pwmChannel[NOCTUA], 0);
+  }
+  
+  // Update watchdog timer to indicate that fan control is still active
+  fanLastCommandTime = millis();
+}
+
+
 void getWaterTemp()
 {
   float f = celcius;
@@ -526,9 +628,14 @@ void getWaterTemp()
   }
 }
 
+float boxTemperature = 0;       // Store the current box temperature for fan control
+float humidity = 0;             // Store the current humidity for fan control
+
 void getBoxTemp()
 {
-  dtostrf(bme.readTemperature(), 3, 1, bmeBuffer);
+  boxTemperature = bme.readTemperature();
+  humidity = bme.readHumidity();
+  dtostrf(boxTemperature, 3, 1, bmeBuffer);
   client.publish("feedback/boxTemp", bmeBuffer);
 }
 
